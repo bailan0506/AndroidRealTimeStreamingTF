@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+
+
+    <EditTextPreference
+        android:key="pref_remote_ip"
+        android:summary="remote ip address to streaming"
+        android:title="Server IP"
+        />
+
+
+    <ListPreference
+        android:title="Supported Resolutions"
+        android:summary="Select the resolution"
+        android:key="pref_resolution"
+        />
+
+    <ListPreference
+        android:title="Supported Bitrate"
+        android:summary="Select the resolution"
+        android:key="pref_bitrate"
+        />
+
+</PreferenceScreen>

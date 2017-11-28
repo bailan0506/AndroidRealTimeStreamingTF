@@ -1,0 +1,26 @@
+{
+    "logs": [
+        {
+            "outputFile": "E:\\17Fall\\707\\Merge\\AndroidRealTimeStreaming\\app\\gradleBuild\\intermediates\\incremental\\mergeDebugAndroidTestResources\\merged.dir\\values-w480dp-v13\\values-w480dp-v13.xml",
+            "map": [
+                {
+                    "source": "C:\\Users\\bailan\\.gradle\\caches\\transforms-1\\files-1.1\\appcompat-v7-22.1.0.aar\\c3ffa8ca08a640b89c72e255d62a8d40\\res\\values-w480dp-v13\\values.xml",
+                    "from": {
+                        "startLines": "4,7",
+                        "startColumns": "4,4",
+                        "startOffsets": "293,594",
+                        "endColumns": "61,71",
+                        "endOffsets": "350,661"
+                    },
+                    "to": {
+                        "startLines": "2,3",
+                        "startColumns": "4,4",
+                        "startOffsets": "55,117",
+                        "endColumns": "61,71",
+                        "endOffsets": "112,184"
+                    }
+                }
+            ]
+        }
+    ]
+}
