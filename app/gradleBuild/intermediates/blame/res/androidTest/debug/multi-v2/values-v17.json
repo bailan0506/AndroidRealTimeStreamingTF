@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "E:\\17Fall\\707\\Merge\\AndroidRealTimeStreaming\\app\\gradleBuild\\intermediates\\incremental\\mergeDebugAndroidTestResources\\merged.dir\\values-v17\\values-v17.xml",
+            "outputFile": "E:\\17Fall\\707\\AndroidRealTimeStreamingTF\\app\\gradleBuild\\intermediates\\incremental\\mergeDebugAndroidTestResources\\merged.dir\\values-v17\\values-v17.xml",
             "map": [
                 {
                     "source": "C:\\Users\\bailan\\.gradle\\caches\\transforms-1\\files-1.1\\appcompat-v7-22.1.0.aar\\c3ffa8ca08a640b89c72e255d62a8d40\\res\\values-v17\\values.xml",

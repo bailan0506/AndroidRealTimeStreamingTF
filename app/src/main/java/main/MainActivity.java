@@ -46,28 +46,13 @@ import utility.Trace;
 import static java.lang.Math.abs;
 
 ////
-// import android.content.pm.PackageManager;
-// import android.hardware.camera2.CameraAccessException;
-// import android.hardware.camera2.CameraCharacteristics;
-// import android.hardware.camera2.CameraManager;
-// import android.hardware.camera2.params.StreamConfigurationMap;
-import android.media.Image;
-import android.media.Image.Plane;
-import android.media.ImageReader;
-import android.media.ImageReader.OnImageAvailableListener;
+
 import android.os.Handler;
 import android.os.HandlerThread;
-// import android.os.Trace;
-import android.util.Size;
-import android.view.KeyEvent;
 import android.view.Surface;
-import android.view.WindowManager;
 import android.widget.Toast;
-import java.nio.ByteBuffer;
 import org.tensorflow.demo.env.ImageUtils;
 import org.tensorflow.demo.env.Logger;
-// import org.tensorflow.demo.R; // Explicit import needed for internal Google builds.
-
 
 
 import android.graphics.Bitmap;
@@ -79,20 +64,15 @@ import android.graphics.Paint;
 import android.graphics.Paint.Style;
 import android.graphics.RectF;
 import android.graphics.Typeface;
-import android.media.ImageReader.OnImageAvailableListener;
 import android.os.SystemClock;
-import android.util.Size;
 import android.util.TypedValue;
-import android.view.Display;
-import android.view.Surface;
-import android.widget.Toast;
-import java.io.IOException;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Vector;
 import org.tensorflow.demo.env.BorderedText;
 import org.tensorflow.demo.tracking.MultiBoxTracker;
-import main.OverlayView.DrawCallback;
+import org.tensorflow.demo.OverlayView.DrawCallback;
+import org.tensorflow.demo.Classifier;
+import org.tensorflow.demo.TensorFlowObjectDetectionAPIModel;
+import org.tensorflow.demo.OverlayView;
 import android.util.Log;
 
 
@@ -132,13 +112,9 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback, Ca
 //////////////////////////////////////
 	private Runnable postInferenceCallback;
 	private Runnable imageConverter;
-	private byte[] lastPreviewFrame;
+//	private byte[] lastPreviewFrame;
 	private static final Logger LOGGER = new Logger();
 	
-	private static final int PERMISSIONS_REQUEST = 1;
-
-//	private static final String PERMISSION_CAMERA = Manifest.permission.CAMERA;
-//	private static final String PERMISSION_STORAGE = Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
 	private boolean debug = false;
 
@@ -150,49 +126,25 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback, Ca
 	private int yRowStride;
 /////////////////////////////////////////////////////////
 
-  // Configuration values for the prepackaged multibox model.
-  private static final int MB_INPUT_SIZE = 224;
-  private static final int MB_IMAGE_MEAN = 128;
-  private static final float MB_IMAGE_STD = 128;
-  private static final String MB_INPUT_NAME = "ResizeBilinear";
-  private static final String MB_OUTPUT_LOCATIONS_NAME = "output_locations/Reshape";
-  private static final String MB_OUTPUT_SCORES_NAME = "output_scores/Reshape";
-  private static final String MB_MODEL_FILE = "file:///android_asset/multibox_model.pb";
-  private static final String MB_LOCATION_FILE =
-      "file:///android_asset/multibox_location_priors.txt";
+
 
   private static final int TF_OD_API_INPUT_SIZE = 300;
   private static final String TF_OD_API_MODEL_FILE =
       "file:///android_asset/ssd_mobilenet_v1_android_export.pb";
   private static final String TF_OD_API_LABELS_FILE = "file:///android_asset/coco_labels_list.txt";
 
-  // Configuration values for tiny-yolo-voc. Note that the graph is not included with TensorFlow and
-  // must be manually placed in the assets/ directory by the user.
-  // Graphs and models downloaded from http://pjreddie.com/darknet/yolo/ may be converted e.g. via
-  // DarkFlow (https://github.com/thtrieu/darkflow). Sample command:
-  // ./flow --model cfg/tiny-yolo-voc.cfg --load bin/tiny-yolo-voc.weights --savepb --verbalise
-  private static final String YOLO_MODEL_FILE = "file:///android_asset/graph-tiny-yolo-voc.pb";
-  private static final int YOLO_INPUT_SIZE = 416;
-  private static final String YOLO_INPUT_NAME = "input";
-  private static final String YOLO_OUTPUT_NAMES = "output";
-  private static final int YOLO_BLOCK_SIZE = 32;
 
-  // Which detection model to use: by default uses Tensorflow Object Detection API frozen
-  // checkpoints.  Optionally use legacy Multibox (trained using an older version of the API)
-  // or YOLO.
-  private enum DetectorMode {
-    TF_OD_API, MULTIBOX, YOLO;
-  }
-  private static final DetectorMode MODE = DetectorMode.TF_OD_API;
+//  private enum DetectorMode {
+//    TF_OD_API, MULTIBOX, YOLO;
+//  }
+//  private static final DetectorMode MODE = DetectorMode.TF_OD_API;
 
   // Minimum detection confidence to track a detection.
   private static final float MINIMUM_CONFIDENCE_TF_OD_API = 0.6f;
-  private static final float MINIMUM_CONFIDENCE_MULTIBOX = 0.1f;
-  private static final float MINIMUM_CONFIDENCE_YOLO = 0.25f;
 
-  private static final boolean MAINTAIN_ASPECT = MODE == DetectorMode.YOLO;
+//
+//  private static final boolean MAINTAIN_ASPECT = MODE == DetectorMode.YOLO;
 
-  private static final Size DESIRED_PREVIEW_SIZE = new Size(640, 480);
 
   private static final boolean SAVE_PREVIEW_BITMAP = false;
   private static final float TEXT_SIZE_DIP = 10;
@@ -481,7 +433,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback, Ca
 	@Override
 	public void onPreviewFrame(final byte[] data, final Camera camera) {
 		Log.v("main","onPreviewFrame");
-		if (isProcessingFrame) {
+		if (isProcessingFrame || isStreaming) {
 			Log.v("Main","IsProcessingFrame");
 		}
 
@@ -491,11 +443,8 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback, Ca
 				// Initialize the storage bitmaps once when the resolution is known.
 				Log.v("main","Initialize the storage bitmaps once when the resolution is known.");
 				if (rgbBytes == null) {
-					Camera.Size previewSize = camera.getParameters().getPreviewSize();
-				//	height = previewSize.height;
-				//	width = previewSize.width;
 					rgbBytes = new int[width * height];
-					onPreviewSizeChosen(new Size(width, height), 270);
+					onPreviewSizeChosen(270);
 				}
 			} catch (final Exception e) {
 				return;
@@ -503,7 +452,6 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback, Ca
 
 
 			isProcessingFrame = true;
-			lastPreviewFrame = data;
 			yuvBytes[0] = data;
 			yRowStride = width;
 
@@ -527,9 +475,10 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback, Ca
 			LOGGER.d("image processing start");
 			processImage();
 			Log.v("Main", "image processed");
+			return;
 		}
-		camera.addCallbackBuffer(previewBuffer);
 
+        camera.addCallbackBuffer(previewBuffer);
 		if (isStreaming) {
 			/*
 			if (FrameData.sequenceIndex%2 == 0) {
@@ -752,67 +701,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback, Ca
 
 
 
-//	public void onImageAvailable(final ImageReader reader) {
-//		//We need wait until we have some size from onPreviewSizeChosen
-//		// if (width == 0 || height == 0) {
-//		//   return;
-//		// }
-//		if (rgbBytes == null) {
-//		  rgbBytes = new int[width * height];
-//		}
-//		try {
-//		  final Image image = reader.acquireLatestImage();
-//
-//		  if (image == null) {
-//			return;
-//		  }
-//
-//		  if (isProcessingFrame) {
-//			image.close();
-//			return;
-//		  }
-//		  isProcessingFrame = true;
-//		//   Trace.beginSection("imageAvailable");
-//		  final Plane[] planes = image.getPlanes();
-//		  fillBytes(planes, yuvBytes);
-//		  yRowStride = planes[0].getRowStride();
-//		  final int uvRowStride = planes[1].getRowStride();
-//		  final int uvPixelStride = planes[1].getPixelStride();
-//
-//		  imageConverter =
-//			  new Runnable() {
-//				@Override
-//				public void run() {
-//				  ImageUtils.convertYUV420ToARGB8888(
-//					  yuvBytes[0],
-//					  yuvBytes[1],
-//					  yuvBytes[2],
-//					  width,
-//					  height,
-//					  yRowStride,
-//					  uvRowStride,
-//					  uvPixelStride,
-//					  rgbBytes);
-//				}
-//			  };
-//
-//		  postInferenceCallback =
-//			  new Runnable() {
-//				@Override
-//				public void run() {
-//				  image.close();
-//				  isProcessingFrame = false;
-//				}
-//			  };
-//
-//		  processImage();
-//		} catch (final Exception e) {
-//		//   LOGGER.e(e, "Exception!");
-//		//   Trace.endSection();
-//		  return;
-//		}
-//		// Trace.endSection();
-//	}
+
 
 
 	@Override
@@ -863,26 +752,15 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback, Ca
 	  super.onDestroy();
 	  stopServices();
 	}
-  
+
+	/*TensorFlow/Image Processing Related Functions*/
 	protected synchronized void runInBackground(final Runnable r) {
 	  if (handler != null) {
 		handler.post(r);
 	  }
 	}
   
-//	protected void fillBytes(final Plane[] planes, final byte[][] yuvBytes) {
-//		// Because of the variable row stride it's not possible to know in
-//		// advance the actual necessary dimensions of the yuv planes.
-//		for (int i = 0; i < planes.length; ++i) {
-//		  final ByteBuffer buffer = planes[i].getBuffer();
-//		  if (yuvBytes[i] == null) {
-//		  	Log.v("fillbytes","Initializing buffer " );
-//			yuvBytes[i] = new byte[buffer.capacity()];
-//		  }
-//		  buffer.get(yuvBytes[i]);
-//		}
-//	}
-//
+
 	public boolean isDebug() {
 		return debug;
 	}
@@ -896,7 +774,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback, Ca
 
 
 
-  public void onPreviewSizeChosen(final Size size, final int rotation) {
+  public void onPreviewSizeChosen(/*final Size size,*/ final int rotation) {
     final float textSizePx =
         TypedValue.applyDimension(
             TypedValue.COMPLEX_UNIT_DIP, TEXT_SIZE_DIP, getResources().getDisplayMetrics());
@@ -906,44 +784,19 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback, Ca
     tracker = new MultiBoxTracker(this);
 
     int cropSize = TF_OD_API_INPUT_SIZE;
-    if (MODE == DetectorMode.YOLO) {
-      detector =
-          TensorFlowYoloDetector.create(
-              getAssets(),
-              YOLO_MODEL_FILE,
-              YOLO_INPUT_SIZE,
-              YOLO_INPUT_NAME,
-              YOLO_OUTPUT_NAMES,
-              YOLO_BLOCK_SIZE);
-      cropSize = YOLO_INPUT_SIZE;
-    } else if (MODE == DetectorMode.MULTIBOX) {
-      detector =
-          TensorFlowMultiBoxDetector.create(
-              getAssets(),
-              MB_MODEL_FILE,
-              MB_LOCATION_FILE,
-              MB_IMAGE_MEAN,
-              MB_IMAGE_STD,
-              MB_INPUT_NAME,
-              MB_OUTPUT_LOCATIONS_NAME,
-              MB_OUTPUT_SCORES_NAME);
-      cropSize = MB_INPUT_SIZE;
-    } else {
-      try {
-        detector = TensorFlowObjectDetectionAPIModel.create(
-            getAssets(), TF_OD_API_MODEL_FILE, TF_OD_API_LABELS_FILE, TF_OD_API_INPUT_SIZE);
-        cropSize = TF_OD_API_INPUT_SIZE;
-      } catch (final IOException e) {
-        Toast toast =
-            Toast.makeText(
-                getApplicationContext(), "Classifier could not be initialized", Toast.LENGTH_SHORT);
-        toast.show();
-        finish();
-      }
-    }
 
-    width = size.getWidth();
-    height = size.getHeight();
+	  try {
+		detector = TensorFlowObjectDetectionAPIModel.create(
+			getAssets(), TF_OD_API_MODEL_FILE, TF_OD_API_LABELS_FILE, TF_OD_API_INPUT_SIZE);
+		cropSize = TF_OD_API_INPUT_SIZE;
+	  } catch (final IOException e) {
+		Toast toast =
+			Toast.makeText(
+				getApplicationContext(), "Classifier could not be initialized", Toast.LENGTH_SHORT);
+		toast.show();
+		finish();
+	  }
+
 
     sensorOrientation = rotation - getScreenOrientation();
     LOGGER.i("Camera orientation relative to screen canvas: %d", sensorOrientation);
@@ -956,14 +809,14 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback, Ca
         ImageUtils.getTransformationMatrix(
             width, height,
             cropSize, cropSize,
-            sensorOrientation, MAINTAIN_ASPECT);
+            sensorOrientation, false);
 
     cropToFrameTransform = new Matrix();
     frameToCropTransform.invert(cropToFrameTransform);
 
-    LOGGER.i("Initializing tracking overlay");
+    //LOGGER.i("Initializing tracking overlay");
     trackingOverlay = (OverlayView) findViewById(R.id.tracking_overlay);
-    LOGGER.i("Initialized Tracking overlay");
+    //LOGGER.i("Initialized Tracking overlay");
     trackingOverlay.addCallback(
         new DrawCallback() {
           @Override
@@ -975,7 +828,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback, Ca
           }
         });
 
-    LOGGER.i("Onpreviewsizechosen");
+    //LOGGER.i("Onpreviewsizechosen");
     addCallback(
         new DrawCallback() {
           @Override
@@ -1026,11 +879,13 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback, Ca
   protected void processImage() {
     ++timestamp;
     final long currTimestamp = timestamp;
-    byte[] originalLuminance = getLuminance();
+//    byte[] originalLuminance = getLuminance();
+	byte[] originalLuminance = yuvBytes[0];
     tracker.onFrame(
         width,
         height,
-        getLuminanceStride(),
+//        getLuminanceStride(),
+        yRowStride,
         sensorOrientation,
         originalLuminance,
         timestamp);
@@ -1075,17 +930,7 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback, Ca
             paint.setStrokeWidth(2.0f);
 
             float minimumConfidence = MINIMUM_CONFIDENCE_TF_OD_API;
-            switch (MODE) {
-              case TF_OD_API:
-                minimumConfidence = MINIMUM_CONFIDENCE_TF_OD_API;
-                break;
-              case MULTIBOX:
-                minimumConfidence = MINIMUM_CONFIDENCE_MULTIBOX;
-                break;
-              case YOLO:
-                minimumConfidence = MINIMUM_CONFIDENCE_YOLO;
-                break;
-            }
+
 
             final List<Classifier.Recognition> mappedRecognitions =
                 new LinkedList<Classifier.Recognition>();
@@ -1110,7 +955,6 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback, Ca
         });
   }
 
-
 	protected int getScreenOrientation() {
 		switch (getWindowManager().getDefaultDisplay().getRotation()) {
 			case Surface.ROTATION_270:
@@ -1124,29 +968,9 @@ public class MainActivity extends Activity implements SurfaceHolder.Callback, Ca
 		}
 	}
 
-
-	protected Size getDesiredPreviewFrameSize() {
-    return DESIRED_PREVIEW_SIZE;
-  }
-
- 
-  public void onSetDebug(final boolean debug) {
-    detector.enableStatLogging(debug);
-  }
-
-
-
 	protected int[] getRgbBytes() {
 		imageConverter.run();
 		return rgbBytes;
-	}
-
-	protected int getLuminanceStride() {
-		return yRowStride;
-	}
-
-	protected byte[] getLuminance() {
-		return yuvBytes[0];
 	}
 
 	protected void readyForNextImage() {

@@ -1,10 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "E:\\17Fall\\707\\Merge\\AndroidRealTimeStreaming\\app\\gradleBuild\\intermediates\\incremental\\mergeDebugResources\\merged.dir\\values\\values.xml",
+            "outputFile": "E:\\17Fall\\707\\AndroidRealTimeStreamingTF\\app\\gradleBuild\\intermediates\\incremental\\mergeDebugResources\\merged.dir\\values\\values.xml",
             "map": [
                 {
-                    "source": "E:\\17Fall\\707\\Merge\\AndroidRealTimeStreaming\\app\\src\\main\\res\\values\\dimens.xml",
+                    "source": "E:\\17Fall\\707\\AndroidRealTimeStreamingTF\\app\\src\\main\\res\\values\\dimens.xml",
                     "from": {
                         "startLines": "3,4",
                         "startColumns": "4,4",
@@ -40,7 +40,7 @@
                     }
                 },
                 {
-                    "source": "E:\\17Fall\\707\\Merge\\AndroidRealTimeStreaming\\app\\src\\main\\res\\values\\styles.xml",
+                    "source": "E:\\17Fall\\707\\AndroidRealTimeStreamingTF\\app\\src\\main\\res\\values\\styles.xml",
                     "from": {
                         "startLines": "6,15",
                         "startColumns": "4,4",
@@ -59,7 +59,7 @@
                     }
                 },
                 {
-                    "source": "E:\\17Fall\\707\\Merge\\AndroidRealTimeStreaming\\app\\src\\main\\res\\values\\strings.xml",
+                    "source": "E:\\17Fall\\707\\AndroidRealTimeStreamingTF\\app\\src\\main\\res\\values\\strings.xml",
                     "from": {
                         "startLines": "54,60,66,22,27,37,45,5,3,4,19,14,34,11,71,76,21,18,73,75,13,36,68,78,6",
                         "startColumns": "4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4",

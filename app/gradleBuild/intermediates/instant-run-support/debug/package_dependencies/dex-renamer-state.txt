@@ -1,4 +1,4 @@
-#Mon Nov 27 14:04:49 CST 2017
-base.0=E\:\\17Fall\\707\\Merge\\AndroidRealTimeStreaming\\app\\gradleBuild\\intermediates\\transforms\\dexMerger\\debug\\10
+#Thu Nov 30 17:26:29 CST 2017
+base.0=E\:\\17Fall\\707\\AndroidRealTimeStreamingTF\\app\\gradleBuild\\intermediates\\transforms\\dexMerger\\debug\\10
 renamed.0=classes.dex
-file.0=E\:\\17Fall\\707\\Merge\\AndroidRealTimeStreaming\\app\\gradleBuild\\intermediates\\transforms\\dexMerger\\debug\\10\\classes.dex
+file.0=E\:\\17Fall\\707\\AndroidRealTimeStreamingTF\\app\\gradleBuild\\intermediates\\transforms\\dexMerger\\debug\\10\\classes.dex
